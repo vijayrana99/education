@@ -1,0 +1,1085 @@
+{
+  "info": {
+    "name": "School CMS API",
+    "description": "Complete API collection for School CMS - Content Management System with Pages, News, Events, Staff, Gallery, Menus, Settings, and Contact modules",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/../health",
+              "host": ["{{baseUrl}}"],
+              "path": ["..", "health"]
+            },
+            "description": "Check if the API server is running"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@school.edu\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate and get JWT token. Token is automatically saved to collection variables after successful login.",
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "// Parse the JSON response",
+                    "var jsonData = pm.response.json();",
+                    "",
+                    "// Save the token to collection variables",
+                    "pm.collectionVariables.set(\"token\", jsonData.token);",
+                    "",
+                    "// Log for debugging",
+                    "console.log(\"Token saved:\", jsonData.token);",
+                    "",
+                    "// Add tests",
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});",
+                    "",
+                    "pm.test(\"Token exists in response\", function () {",
+                    "    pm.expect(jsonData).to.have.property('token');",
+                    "});",
+                    "",
+                    "pm.test(\"Token saved to collection variables\", function () {",
+                    "    pm.expect(pm.collectionVariables.get('token')).to.exist;",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Get current authenticated user information"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pages",
+      "item": [
+        {
+          "name": "List Pages (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pages?limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["pages"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Get all published pages with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Page by ID (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pages/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["pages", ":id"]
+            },
+            "description": "Get a specific page by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Page (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"About Us\",\n  \"slug\": \"about-us\",\n  \"content\": \"This is the about page content\",\n  \"metaTitle\": \"About Our School\",\n  \"metaDescription\": \"Learn more about our school\",\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/pages",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "pages"]
+            },
+            "description": "Create a new page (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Page (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"About Us Updated\",\n  \"content\": \"Updated content here\",\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/pages/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "pages", ":id"]
+            },
+            "description": "Update an existing page (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Page (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/pages/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "pages", ":id"]
+            },
+            "description": "Delete a page (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "News Categories",
+      "item": [
+        {
+          "name": "List Categories (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/news/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["news", "categories"]
+            },
+            "description": "Get all news categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category by Slug (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/news/categories/:slug",
+              "host": ["{{baseUrl}}"],
+              "path": ["news", "categories", ":slug"]
+            },
+            "description": "Get a specific category by slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admissions\",\n  \"slug\": \"admissions\",\n  \"description\": \"All admission-related news\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/news/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "news", "categories"]
+            },
+            "description": "Create a new news category (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admissions Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/news/categories/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "news", "categories", ":id"]
+            },
+            "description": "Update a news category (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/news/categories/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "news", "categories", ":id"]
+            },
+            "description": "Delete a news category (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "News",
+      "item": [
+        {
+          "name": "List News (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/news?limit=10&offset=0&status=PUBLISHED",
+              "host": ["{{baseUrl}}"],
+              "path": ["news"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "status",
+                  "value": "PUBLISHED"
+                }
+              ]
+            },
+            "description": "Get all news articles with optional filters (categoryId, status)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get News by Slug (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/news/:slug",
+              "host": ["{{baseUrl}}"],
+              "path": ["news", ":slug"]
+            },
+            "description": "Get a specific news article by slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Create News (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"School Opens New Science Lab\",\n  \"slug\": \"school-opens-new-lab\",\n  \"excerpt\": \"New state-of-the-art science lab opening this month\",\n  \"content\": \"Full article content here...\",\n  \"author\": \"Admin\",\n  \"categoryId\": \"CATEGORY_ID_HERE\",\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/news",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "news"]
+            },
+            "description": "Create a new news article (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update News (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"content\": \"Updated content\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/news/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "news", ":id"]
+            },
+            "description": "Update a news article (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete News (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/news/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "news", ":id"]
+            },
+            "description": "Delete a news article (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List Events (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events?limit=10&offset=0&status=PUBLISHED",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "status",
+                  "value": "PUBLISHED"
+                }
+              ]
+            },
+            "description": "Get all events with optional date range filters (startDateFrom, startDateTo)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event by Slug (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/:slug",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", ":slug"]
+            },
+            "description": "Get a specific event by slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Event (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Sports Day\",\n  \"slug\": \"annual-sports-day-2024\",\n  \"description\": \"Join us for our annual sports day\",\n  \"location\": \"School Ground\",\n  \"startDate\": \"2024-06-15T09:00:00Z\",\n  \"endDate\": \"2024-06-15T17:00:00Z\",\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "events"]
+            },
+            "description": "Create a new event (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Event (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Event Title\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/events/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "events", ":id"]
+            },
+            "description": "Update an event (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Event (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/events/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "events", ":id"]
+            },
+            "description": "Delete an event (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "List Staff (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/staff?limit=20&offset=0&status=PUBLISHED",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "status",
+                  "value": "PUBLISHED"
+                }
+              ]
+            },
+            "description": "Get all staff members with optional department filter"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Staff by ID (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/staff/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff", ":id"]
+            },
+            "description": "Get a specific staff member by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Staff (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. John Smith\",\n  \"position\": \"Principal\",\n  \"department\": \"Administration\",\n  \"email\": \"john.smith@school.edu\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Dr. Smith has been the principal for 10 years\",\n  \"displayOrder\": 1,\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/staff",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "staff"]
+            },
+            "description": "Create a new staff member (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Staff (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"Updated Position\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/staff/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "staff", ":id"]
+            },
+            "description": "Update a staff member (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Staff (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/staff/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "staff", ":id"]
+            },
+            "description": "Delete a staff member (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Gallery",
+      "item": [
+        {
+          "name": "List Albums (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gallery/albums?limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["gallery", "albums"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Get all gallery albums"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Album by Slug (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gallery/albums/:slug",
+              "host": ["{{baseUrl}}"],
+              "path": ["gallery", "albums", ":slug"]
+            },
+            "description": "Get a specific album with all images by slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Album (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Day 2024\",\n  \"slug\": \"annual-day-2024\",\n  \"description\": \"Photos from our annual day celebration\",\n  \"coverImage\": \"https://example.com/cover.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/gallery/albums",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "gallery", "albums"]
+            },
+            "description": "Create a new gallery album (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Album (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/gallery/albums/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "gallery", "albums", ":id"]
+            },
+            "description": "Delete a gallery album (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Image in Album (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Group Photo\",\n  \"imageUrl\": \"https://example.com/photo1.jpg\",\n  \"caption\": \"Students and teachers together\",\n  \"displayOrder\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/gallery/albums/:albumId/images",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "gallery", "albums", ":albumId", "images"]
+            },
+            "description": "Add an image to an album (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Image (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/gallery/images/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "gallery", "images", ":id"]
+            },
+            "description": "Delete an image from an album (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Menus",
+      "item": [
+        {
+          "name": "Get Menus (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menus?location=HEADER",
+              "host": ["{{baseUrl}}"],
+              "path": ["menus"],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "HEADER"
+                }
+              ]
+            },
+            "description": "Get navigation menus (HEADER or FOOTER). Returns hierarchical menu structure."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Menu (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Navigation\",\n  \"location\": \"HEADER\",\n  \"title\": \"About\",\n  \"url\": \"/about\",\n  \"displayOrder\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/menus",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "menus"]
+            },
+            "description": "Create a new menu item (requires EDITOR or ADMIN role). Use parentId to create nested menus."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Menu (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/menus/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "menus", ":id"]
+            },
+            "description": "Update a menu item (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Menu (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/menus/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "menus", ":id"]
+            },
+            "description": "Delete a menu item (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get Settings (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["settings"]
+            },
+            "description": "Get all site-wide settings as key-value pairs"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Settings (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"site_name\": \"My School\",\n  \"site_email\": \"contact@school.edu\",\n  \"site_address\": \"123 School Street, City\",\n  \"facebook\": \"https://facebook.com/school\",\n  \"twitter\": \"https://twitter.com/school\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "settings"]
+            },
+            "description": "Update site-wide settings (requires EDITOR or ADMIN role)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "item": [
+        {
+          "name": "Submit Contact Form (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"subject\": \"Inquiry about admissions\",\n  \"message\": \"I would like to know more about the admission process.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contact",
+              "host": ["{{baseUrl}}"],
+              "path": ["contact"]
+            },
+            "description": "Submit a contact form (public endpoint, no authentication required)"
+          },
+          "response": []
+        },
+        {
+          "name": "List Contact Submissions (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/contact?limit=10&offset=0&status=NEW",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "contact"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "status",
+                  "value": "NEW"
+                }
+              ]
+            },
+            "description": "Get all contact submissions with optional status filter (NEW, READ, RESPONDED)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contact Submission (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/contact/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "contact", ":id"]
+            },
+            "description": "Get a specific contact submission by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Contact Status (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"READ\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/contact/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "contact", ":id"]
+            },
+            "description": "Update contact submission status (NEW, READ, RESPONDED)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  EDITOR
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MenuLocation {
+  HEADER
+  FOOTER
+}
+
+enum HomeSectionType {
+  HERO
+  WELCOME
+  FEATURES
+  SPOTLIGHT
+  NOTICES
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  RESPONDED
+}
+
+// ============================================
+// USER - Admin authentication
+// ============================================
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         UserRole  @default(EDITOR)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// ============================================
+// SETTING - Site-wide configuration
+// ============================================
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// ============================================
+// PAGE - Static pages
+// ============================================
+
+model Page {
+  id             String        @id @default(uuid())
+  title          String
+  slug           String        @unique
+  content        String        @db.Text
+  metaTitle      String?
+  metaDescription String?
+  status         ContentStatus @default(DRAFT)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@map("pages")
+}
+
+// ============================================
+// HOME SECTION - Homepage content blocks
+// ============================================
+
+model HomeSection {
+  id          String         @id @default(uuid())
+  type        HomeSectionType
+  title       String?
+  subtitle    String?
+  content     String?        @db.Text
+  image       String?
+  link        String?
+  linkText    String?
+  displayOrder Int           @default(0)
+  status      ContentStatus  @default(DRAFT)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([type, status, displayOrder])
+  @@map("home_sections")
+}
+
+// ============================================
+// NEWS CATEGORY - News categorization
+// ============================================
+
+model NewsCategory {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  news        News[]
+
+  @@index([slug])
+  @@map("news_categories")
+}
+
+// ============================================
+// NEWS - News and announcements
+// ============================================
+
+model News {
+  id           String        @id @default(uuid())
+  categoryId   String
+  title        String
+  slug         String        @unique
+  excerpt      String?       @db.Text
+  content      String        @db.Text
+  image        String?
+  author       String?
+  status       ContentStatus @default(DRAFT)
+  publishedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  category     NewsCategory  @relation(fields: [categoryId], references: [id])
+
+  @@index([slug])
+  @@index([categoryId, status])
+  @@index([publishedAt])
+  @@map("news")
+}
+
+// ============================================
+// EVENT - Calendar events
+// ============================================
+
+model Event {
+  id          String        @id @default(uuid())
+  title       String
+  slug        String        @unique
+  description String?       @db.Text
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  image       String?
+  status      ContentStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([slug])
+  @@index([startDate, status])
+  @@map("events")
+}
+
+// ============================================
+// GALLERY ALBUM - Photo album containers
+// ============================================
+
+model GalleryAlbum {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String?
+  coverImage  String?
+  createdAt   DateTime @default(now())
+
+  images      GalleryImage[]
+
+  @@index([slug])
+  @@map("gallery_albums")
+}
+
+// ============================================
+// GALLERY IMAGE - Individual images
+// ============================================
+
+model GalleryImage {
+  id           String       @id @default(uuid())
+  albumId      String
+  title        String?
+  imageUrl     String
+  caption      String?
+  displayOrder Int          @default(0)
+  createdAt    DateTime     @default(now())
+
+  album        GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@index([albumId, displayOrder])
+  @@map("gallery_images")
+}
+
+// ============================================
+// STAFF - Faculty and staff directory
+// ============================================
+
+model Staff {
+  id           String        @id @default(uuid())
+  name         String
+  position     String
+  department   String?
+  email        String?
+  phone        String?
+  bio          String?       @db.Text
+  image        String?
+  displayOrder Int           @default(0)
+  status       ContentStatus @default(DRAFT)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([department, status])
+  @@index([displayOrder])
+  @@map("staff")
+}
+
+// ============================================
+// MENU - Navigation with nesting
+// ============================================
+
+model Menu {
+  id           String      @id @default(uuid())
+  name         String
+  location     MenuLocation
+  parentId     String?
+  title        String
+  url          String
+  displayOrder Int         @default(0)
+  createdAt    DateTime    @default(now())
+
+  parent       Menu?       @relation("MenuHierarchy", fields: [parentId], references: [id])
+  children     Menu[]      @relation("MenuHierarchy")
+
+  @@unique([location, url])
+  @@index([location, parentId, displayOrder])
+  @@map("menus")
+}
+
+// ============================================
+// CONTACT SUBMISSION - Contact form entries
+// ============================================
+
+model ContactSubmission {
+  id        String        @id @default(uuid())
+  name      String
+  email     String
+  subject   String?
+  message   String        @db.Text
+  status    ContactStatus @default(NEW)
+  createdAt DateTime      @default(now())
+
+  @@index([status])
+  @@map("contact_submissions")
+}
