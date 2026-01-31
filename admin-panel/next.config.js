@@ -1,12 +1,9 @@
-/** @type {import('next').NextConfig } */
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
-  typescript: {
-    paths: {
-      tsConfigPath: "./tsconfig.json",
-    },
+  images: {
+    domains: ['localhost'],
   },
 }
 
-export default nextConfig
+module.exports = nextConfig

@@ -31,6 +31,24 @@ export const auth = {
   isAuthenticated: () => {
     return typeof window !== 'undefined' && !!localStorage.getItem('token')
   },
+
+  getCurrentUser: async (): Promise<User | null> => {
+    if (typeof window === 'undefined') return null
+    const token = localStorage.getItem('token')
+    if (!token) return null
+    try {
+      const response = await fetch('http://localhost:3000/api/v1/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) return null
+      const data = await response.json()
+      return data.data
+    } catch {
+      return null
+    }
+  },
 }
 
 export const USER_ROLE = {

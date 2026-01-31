@@ -1,13 +1,13 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -44,7 +44,6 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        // Custom Color Scheme: Professional Slate
         slate: {
           50: '#f8fafc',
           100: '#f1f5f9',
@@ -52,10 +51,10 @@ const config: Config = {
           300: '#cbd5e1',
           400: '#94a3b8',
           500: '#64748b',
-          600: '#475569',  // Primary light mode
-          700: '#334155',  // Background light mode
-          800: '#1e293b',  // Border light mode
-          900: '#0f172a',  // Background dark mode
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
           950: '#020617',
         },
         indigo: {
@@ -64,7 +63,7 @@ const config: Config = {
           200: '#c7d2fe',
           300: '#a5b4fc',
           400: '#818cf8',
-          500: '#6366f1',  // Accent color
+          500: '#6366f1',
           600: '#4f46e5',
           700: '#4338ca',
           800: '#3730a3',
@@ -76,7 +75,7 @@ const config: Config = {
           100: '#d1fae5',
           200: '#a7f3d0',
           300: '#34d399',
-          400: '#10b981',  // Success
+          400: '#10b981',
           500: '#059669',
           600: '#047857',
           700: '#065f46',
@@ -89,7 +88,7 @@ const config: Config = {
           100: '#fef3c7',
           200: '#fde68a',
           300: '#fcd34d',
-          400: '#fbbf24',  // Warning
+          400: '#fbbf24',
           500: '#f59e0b',
           600: '#d97706',
           700: '#b45309',
@@ -102,7 +101,7 @@ const config: Config = {
           100: '#ffe4e6',
           200: '#fecdd3',
           300: '#fda4af',
-          400: '#fb7185',  // Error
+          400: '#fb7185',
           500: '#f43f5e',
           600: '#e11d48',
           700: '#be123c',
@@ -116,22 +115,9 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
-      keyframes: {
-        'accordion-down': {
-          '0%': { height: '0' },
-          '100%': { height: 'var(--radix-accordion-content-height)' },
-        },
-        'accordion-up': {
-          '0%': { height: 'var(--radix-accordion-content-height)' },
-          '100%': { height: '0' },
-        },
-      },
-      animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-      },
     },
   },
   plugins: [],
 }
+
 export default config
